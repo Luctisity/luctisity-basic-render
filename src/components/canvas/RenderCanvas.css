@@ -1,0 +1,26 @@
+.canvas-wrapper {
+    position: relative;
+    border-radius: 4px;
+    overflow: hidden;
+    display: inline-flex;
+}
+
+.canvas-wrapper canvas.hid {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.luctisity-render-popup {
+    position: absolute;
+    display: flex;
+    height: 100%;
+    width: 100%;
+    justify-content: center;
+    align-items: center;
+    background: #8042FF;
+    color: #fff;
+    font-size: 24px;
+}
+.luctisity-render-popup.error {
+    background: #e33042;
+}
