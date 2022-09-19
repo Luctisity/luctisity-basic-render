@@ -15,6 +15,7 @@
     "author": "Luctisity",
     "license": "MIT",
     "dependencies": {
+        "gl-matrix": "^3.4.3",
         "preact": "^10.10.6"
     },
     "devDependencies": {

@@ -1,10 +1,11 @@
 import vertexShaderSource   from '../../assets/shaders/vertex.vsh?raw';
 import fragmentShaderSource from '../../assets/shaders/fragment.fsh?raw';
+import Drawable from './drawable';
 
 export function initGl (canvas: HTMLCanvasElement) {
     // get gl context
 
-    const gl = canvas.getContext('webgl');
+    const gl = canvas.getContext('webgl2');
     if (!gl) return false;
 
 
@@ -40,54 +41,31 @@ export function initGl (canvas: HTMLCanvasElement) {
     const program = gl.createProgram()!;
     gl.attachShader(program, vertexShader);
     gl.attachShader(program, fragmentShader);
+
     gl.linkProgram (program);
     if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
         console.error(gl.getProgramInfoLog(program));
         return false;
     }
+    
+    gl.useProgram(program);
 
+    // create drawable
 
-    // create buffers
+    const [
+        positionAttribLocation, 
+        colorAttribLocation, 
+        vertexArrayObject
+    ] = Drawable.init(gl, program);
 
-    const triVertecies = [
-     // X Y           R G B
-        0.0,  0.5,    1, 0, 0,
-        -0.5, -0.5,   0, 1, 0,
-        0.5,  -0.5,   0, 0, 1,
-    ];
-
-    const triVertexBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, triVertexBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(triVertecies), gl.STATIC_DRAW);
-
-    const positionAttribLocation = gl.getAttribLocation(program, 'vertPosition');
-    const colorAttribLocation    = gl.getAttribLocation(program, 'vertColor');
-
-    gl.vertexAttribPointer(
-        positionAttribLocation,
-        2, // count
-        gl.FLOAT,
-        false, 
-        5 * Float32Array.BYTES_PER_ELEMENT, // size of one vertex
-        0 // offset
-    );
-    gl.vertexAttribPointer(
-        colorAttribLocation,
-        3, // count
-        gl.FLOAT,
-        false, 
-        5 * Float32Array.BYTES_PER_ELEMENT, // size of one vertex
-        2 * Float32Array.BYTES_PER_ELEMENT // offset
-    );
-
-    gl.enableVertexAttribArray(positionAttribLocation);
-    gl.enableVertexAttribArray(colorAttribLocation);
-
+    const testRect = new Drawable(400, 200, canvas);
+    testRect.render(program, positionAttribLocation, colorAttribLocation);
 
     // render
 
-    gl.useProgram(program);
-    gl.drawArrays(gl.TRIANGLES, 0, 3);
+    gl.bindVertexArray(vertexArrayObject);
+    gl.drawArrays(gl.TRIANGLES, 0, 6);
 
     return true;
+    
 }
