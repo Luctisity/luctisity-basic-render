@@ -59,6 +59,7 @@ export function initGl (canvas: HTMLCanvasElement) {
     ] = Drawable.init(gl, program);
 
     const testRect = new Drawable(400, 200, canvas);
+    testRect.rot = 15;
     testRect.render(program, positionAttribLocation, colorAttribLocation);
 
     // render
@@ -67,5 +68,5 @@ export function initGl (canvas: HTMLCanvasElement) {
     gl.drawArrays(gl.TRIANGLES, 0, 6);
 
     return true;
-    
+
 }

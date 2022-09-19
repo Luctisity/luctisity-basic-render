@@ -1,5 +1,5 @@
 import { mat3 } from "gl-matrix";
-import { ajustToCanvasSize } from "../util/util";
+import { transformPosCoords, transformRotCoords, transformScaleCoords, transformSizeCoords } from "../util/util";
 
 export const rectVertices = [
 //  X     Y       R  G  B
@@ -21,11 +21,11 @@ export default class Drawable {
     canvas: HTMLCanvasElement;
     gl:     WebGL2RenderingContext;
 
-    transX: number = 0;
-    transY: number = 0;
+    posX:   number = 320;
+    posY:   number = 180;
     rot:    number = 0;
-    scaleX: number = 1;
-    scaleY: number = 1;
+    scaleX: number = 100;
+    scaleY: number = 100;
 
     constructor (width: number, height: number, canvas: HTMLCanvasElement) {
         this.width  = width;
@@ -71,17 +71,27 @@ export default class Drawable {
 
         const gl = this.gl;
         
-        let [widthAdj, heightAdj] = ajustToCanvasSize(
+        let rotAdj = transformRotCoords(this.rot);
+
+        let [widthAdj, heightAdj] = transformSizeCoords(
             this.width, this.height, 
             this.canvas.width, this.canvas.height
         );
 
+        let [posXAdj, posYAdj] = transformPosCoords(
+            this.posX, this.posY,
+            this.canvas.width, this.canvas.height
+        );
+
+
+        let [scaleXAdj, scaleYAdj] = transformScaleCoords(this.scaleX, this.scaleY);
+
         let transform = mat3.create();
 
-        mat3.translate (transform, transform, [this.transX, this.transY]);
-        mat3.scale     (transform, transform, [widthAdj, heightAdj])
-        mat3.scale     (transform, transform, [this.scaleX, this.scaleY]);
-        mat3.rotate    (transform, transform, this.rot);
+        mat3.translate (transform, transform, [posXAdj,   posYAdj]);
+        mat3.scale     (transform, transform, [widthAdj,  heightAdj]);
+        mat3.scale     (transform, transform, [scaleXAdj, scaleYAdj]);
+        mat3.rotate    (transform, transform, rotAdj);
 
         gl.uniformMatrix3fv(gl.getUniformLocation(program, 'transform'), false, transform);
 
