@@ -1,15 +1,11 @@
 export const DEG_TO_RAD =  Math.PI/180;
 
-export function transformSizeCoords (x: number, y: number, canvasWidth: number, canvasHeight: number) {
-    let [newX, newY] = [x / (canvasWidth*0.5), y / (canvasHeight*0.5)];
-    //let [sinR, cosR] = [Math.sin(rot), Math.cos(rot)];
-
-
-    return [newX, newY];
+export function canvasSizeCompensate (canvasWidth: number, canvasHeight: number) {
+    return [1/canvasWidth, 1/canvasHeight]
 }
 
 export function transformPosCoords (x: number, y: number, canvasWidth: number, canvasHeight: number) {
-    return [x / (canvasWidth*0.5) - 1, y / (canvasHeight*0.5) - 1];
+    return [x / canvasWidth - 1, y / canvasHeight - 1];
 }
 
 export function transformRotCoords (degrees: number) {
@@ -18,4 +14,8 @@ export function transformRotCoords (degrees: number) {
 
 export function transformScaleCoords (x: number, y: number) {
     return [x * 0.01, y * 0.01];
+}
+
+export function transformColor (r: number, g: number, b: number, a: number) {
+    return [r/255, g/255, b/255, a*0.01];
 }

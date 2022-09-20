@@ -28,7 +28,7 @@ export default class RenderCanvas extends Component <RenderCanvasProps> {
         let canvas = this.canvasRef.current;
 
         // create a drawable
-        this.testDrawable = new Drawable(100, 200, canvas);
+        this.testDrawable = new Drawable(300, 200, canvas);
         addDrawable(this.testDrawable);
 
         // initiate webgl, return if error

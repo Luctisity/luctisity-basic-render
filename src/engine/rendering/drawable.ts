@@ -1,7 +1,12 @@
 import { mat3 } from "gl-matrix";
-import { transformPosCoords, transformRotCoords, transformScaleCoords, transformSizeCoords } from "../util/util";
+import { canvasSizeCompensate, transformColor, transformPosCoords, transformRotCoords, transformScaleCoords } from "../util/util";
 
 import testTexture from "../../assets/textures/man.jpg";
+
+let CANVASW:  number;
+let CANVASH:  number;
+let CANVASWC: number;
+let CANVASHC: number;
 
 export const rectVertices = [
 //  X     Y       U  V
@@ -29,14 +34,25 @@ export default class Drawable {
     scaleX: number = 100;
     scaleY: number = 100;
 
+    colorR:  number = 255;
+    colorG:  number = 255;
+    colorB:  number = 255;
+    opacity: number = 100;
+
     constructor (width: number, height: number, canvas: HTMLCanvasElement) {
         this.width  = width;
         this.height = height;
         this.canvas = canvas;
         this.gl     = this.canvas.getContext("webgl2")!;
+
+        // canvas vars
+
+        [CANVASW, CANVASH] = [canvas.width*0.5, canvas.height*0.5];
+        [CANVASWC, CANVASHC] = canvasSizeCompensate(CANVASW, CANVASH);
     }
 
     static init (gl: WebGL2RenderingContext, program: WebGLProgram) {
+
         // create vbo an vao
 
         const vertexBufferObject = gl.createBuffer();
@@ -115,14 +131,9 @@ export default class Drawable {
 
         let rotAdj = transformRotCoords(this.rot);
 
-        let [widthAdj, heightAdj] = transformSizeCoords(
-            this.width, this.height, 
-            this.canvas.width, this.canvas.height
-        );
-
         let [posXAdj, posYAdj] = transformPosCoords(
             this.posX, this.posY,
-            this.canvas.width, this.canvas.height
+            CANVASW, CANVASH
         );
 
         let [scaleXAdj, scaleYAdj] = transformScaleCoords(this.scaleX, this.scaleY);
@@ -133,11 +144,19 @@ export default class Drawable {
         let transform = mat3.create();
 
         mat3.translate (transform, transform, [posXAdj,   posYAdj]);
+        mat3.scale     (transform, transform, [CANVASWC, CANVASHC]);
         mat3.rotate    (transform, transform, rotAdj);
-        mat3.scale     (transform, transform, [widthAdj,  heightAdj]);
+        mat3.scale     (transform, transform, [this.width, this.height]);
         mat3.scale     (transform, transform, [scaleXAdj, scaleYAdj]);
 
         gl.uniformMatrix3fv(gl.getUniformLocation(program, 'transform'), false, transform);
+
+
+        // color uniform
+
+        let [r, g, b, a] = transformColor(this.colorR, this.colorG, this.colorB, this.opacity);
+
+        gl.uniform4f(gl.getUniformLocation(program, 'color'), r, g, b, a);
 
 
         // update gl stuff
