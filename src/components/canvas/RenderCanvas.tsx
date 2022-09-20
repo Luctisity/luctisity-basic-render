@@ -17,6 +17,8 @@ export default class RenderCanvas extends Component <RenderCanvasProps> {
 
     testDrawable?: Drawable;
 
+    fpsDelta = this.props.fps ? 1/this.props.fps : -1;
+
     render () {
         return <div className="canvas-wrapper">
             <canvas ref={this.canvasRef} width={this.props.width} height={this.props.height} className={this.getCanvasClassName()}></canvas>
@@ -39,13 +41,27 @@ export default class RenderCanvas extends Component <RenderCanvasProps> {
         requestAnimationFrame(this.step);
     }
 
-    step = () => {
+    step = (prevNow: number = Date.now(), internalPrevNow: number = 0) => {
+        let now = Date.now();
+        let delta = (now - prevNow) * 0.001;
+
+        // if the frame rate is fixed
+        if (this.fpsDelta != -1) {
+            let internalDelta = (now - internalPrevNow) * 0.001;
+            
+            // wait until the fps threshold is reached
+            if (delta < this.fpsDelta - internalDelta) {
+                requestAnimationFrame(() => this.step(prevNow, now));
+                return;
+            }
+        }
+
         // test drawable action
-        this.testDrawable!.rot += 1;
+        this.testDrawable!.rot += 36 * delta;
 
         // render and continue loop
         renderGl();
-        requestAnimationFrame(this.step);
+        requestAnimationFrame(() => this.step(now, now));
     }
 
     getCanvasClassName () {

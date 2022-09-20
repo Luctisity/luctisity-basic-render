@@ -74,7 +74,7 @@ export function initGl (canvas: HTMLCanvasElement) {
 }
 
 export function renderGl () {
-
+    
     clearBg();
     
     drawables.forEach(d => {
