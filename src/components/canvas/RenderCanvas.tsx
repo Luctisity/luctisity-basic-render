@@ -38,7 +38,7 @@ export default class RenderCanvas extends Component <RenderCanvasProps> {
         if (!success) return this.setState({ error: true });
 
         // start render loop
-        requestAnimationFrame(this.step);
+        requestAnimationFrame(() => this.step(Date.now()));
     }
 
     step = (prevNow: number = Date.now(), internalPrevNow: number = 0) => {
@@ -58,6 +58,7 @@ export default class RenderCanvas extends Component <RenderCanvasProps> {
 
         // test drawable action
         this.testDrawable!.rot += 36 * delta;
+        this.testDrawable!.opacity = Math.sin(now*0.001) * 50 + 50;
 
         // render and continue loop
         renderGl();

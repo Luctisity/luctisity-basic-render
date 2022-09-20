@@ -14,7 +14,7 @@ let gl:                     WebGL2RenderingContext,
 export function initGl (canvas: HTMLCanvasElement) {
     // get gl context
 
-    gl = canvas.getContext('webgl2')!;
+    gl = canvas.getContext('webgl2', { alpha: false })!;
     if (!gl) return false;
 
 

@@ -1,7 +1,7 @@
 import { mat3 } from "gl-matrix";
 import { canvasSizeCompensate, transformColor, transformPosCoords, transformRotCoords, transformScaleCoords } from "../util/util";
 
-import testTexture from "../../assets/textures/man.jpg";
+import testTexture from "../../assets/textures/troll.png";
 
 let CANVASW:  number;
 let CANVASH:  number;
@@ -34,8 +34,8 @@ export default class Drawable {
     scaleX: number = 100;
     scaleY: number = 100;
 
-    colorR:  number = 255;
-    colorG:  number = 255;
+    colorR:  number = 0;
+    colorG:  number = 128;
     colorB:  number = 255;
     opacity: number = 100;
 
@@ -52,6 +52,8 @@ export default class Drawable {
     }
 
     static init (gl: WebGL2RenderingContext, program: WebGLProgram) {
+
+        gl.enable(gl.BLEND);
 
         // create vbo an vao
 
@@ -163,6 +165,7 @@ export default class Drawable {
 
         gl.enableVertexAttribArray(posLoc);
         gl.enableVertexAttribArray(colorLoc);
+        gl.blendFuncSeparate(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
 
     }
 
