@@ -34,8 +34,8 @@ export default class Drawable {
     scaleX: number = 100;
     scaleY: number = 100;
 
-    colorR:  number = 0;
-    colorG:  number = 128;
+    colorR:  number = 255;
+    colorG:  number = 255;
     colorB:  number = 255;
     opacity: number = 100;
 
@@ -119,7 +119,7 @@ export default class Drawable {
 
     }
 
-    render (program: WebGLProgram, posLoc: number, colorLoc: number) {
+    render (program: WebGLProgram, posLoc: number, colorLoc: number, vertexArrayObject: WebGLVertexArrayObject | null) {
 
         const gl = this.gl;
         
@@ -166,6 +166,11 @@ export default class Drawable {
         gl.enableVertexAttribArray(posLoc);
         gl.enableVertexAttribArray(colorLoc);
         gl.blendFuncSeparate(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
+
+        // render
+
+        gl.bindVertexArray(vertexArrayObject);
+        gl.drawArrays(gl.TRIANGLES, 0, 6);
 
     }
 

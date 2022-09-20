@@ -78,11 +78,8 @@ export function renderGl () {
     clearBg();
     
     drawables.forEach(d => {
-        d.render(program, positionAttribLocation, colorAttribLocation);
+        d.render(program, positionAttribLocation, colorAttribLocation, vertexArrayObject);
     });
-
-    gl.bindVertexArray(vertexArrayObject);
-    gl.drawArrays(gl.TRIANGLES, 0, 6);
 
 }
 

@@ -15,13 +15,14 @@ export default class RenderCanvas extends Component <RenderCanvasProps> {
 
     canvasRef = createRef();
 
-    testDrawable?: Drawable;
+    testDrawable?:  Drawable;
+    testDrawable2?: Drawable;
 
     fpsDelta = this.props.fps ? 1/this.props.fps : -1;
 
     render () {
         return <div className="canvas-wrapper">
-            <canvas ref={this.canvasRef} width={this.props.width} height={this.props.height} className={this.getCanvasClassName()}></canvas>
+            <canvas id="luctisityRenderCanvas" ref={this.canvasRef} width={this.props.width} height={this.props.height} className={this.getCanvasClassName()}></canvas>
             {this.getErrorScreen()}
         </div>
     }
@@ -31,6 +32,12 @@ export default class RenderCanvas extends Component <RenderCanvasProps> {
 
         // create a drawable
         this.testDrawable = new Drawable(300, 200, canvas);
+        this.testDrawable.colorR = 0;
+        this.testDrawable.colorG = 128;
+
+        this.testDrawable2 = new Drawable(100, 200, canvas);
+
+        addDrawable(this.testDrawable2);
         addDrawable(this.testDrawable);
 
         // initiate webgl, return if error
@@ -59,6 +66,8 @@ export default class RenderCanvas extends Component <RenderCanvasProps> {
         // test drawable action
         this.testDrawable!.rot += 36 * delta;
         this.testDrawable!.opacity = Math.sin(now*0.001) * 50 + 50;
+
+        this.testDrawable2!.posX = Math.sin(now*0.001) * 100 + 420;
 
         // render and continue loop
         renderGl();
