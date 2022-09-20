@@ -3,11 +3,11 @@ precision mediump float;
 uniform mat3 transform;
 
 attribute vec2 vertPosition;
-attribute vec3 vertColor;
-varying   vec3 fragColor;
+attribute vec2 vertTexCoord;
+varying   vec2 fragTexCoord;
 
 void main ()
 {
-    fragColor = vertColor;
-    gl_Position = vec4(transform * vec3(vertPosition, 1.0), 1.0);
+    fragTexCoord = vertTexCoord;
+    gl_Position  = vec4(transform * vec3(vertPosition, 1.0), 1.0);
 }

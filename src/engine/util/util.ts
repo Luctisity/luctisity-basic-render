@@ -1,7 +1,7 @@
 export const DEG_TO_RAD =  Math.PI/180;
 
 export function transformSizeCoords (x: number, y: number, canvasWidth: number, canvasHeight: number) {
-    let [newX, newY] = [x / canvasWidth, y / canvasHeight];
+    let [newX, newY] = [x / (canvasWidth*0.5), y / (canvasHeight*0.5)];
     //let [sinR, cosR] = [Math.sin(rot), Math.cos(rot)];
 
 

@@ -8,7 +8,8 @@ let gl:                     WebGL2RenderingContext,
     program:                WebGLProgram, 
     positionAttribLocation: number, 
     colorAttribLocation:    number, 
-    vertexArrayObject:      WebGLVertexArrayObject | null;
+    vertexArrayObject:      WebGLVertexArrayObject | null,
+    texture:                WebGLTexture | null;
 
 export function initGl (canvas: HTMLCanvasElement) {
     // get gl context
@@ -62,7 +63,8 @@ export function initGl (canvas: HTMLCanvasElement) {
     [
         positionAttribLocation, 
         colorAttribLocation, 
-        vertexArrayObject
+        vertexArrayObject,
+        texture
     ] = Drawable.init(gl, program);
 
     renderGl();
@@ -89,6 +91,6 @@ export function addDrawable (d: Drawable) {
 }
 
 function clearBg () {
-    gl.clearColor(0, 0, 0, 1);
+    gl.clearColor(0.5, 0, 1, 1);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 }

@@ -1,17 +1,19 @@
 import { mat3 } from "gl-matrix";
 import { transformPosCoords, transformRotCoords, transformScaleCoords, transformSizeCoords } from "../util/util";
 
+import testTexture from "../../assets/textures/man.jpg";
+
 export const rectVertices = [
-//  X     Y       R  G  B
-    -0.5, 0.5,    1, 0, 0,
-    0.5,  -0.5,   0, 1, 0,
-    -0.5, -0.5,   0, 0, 1,
-    -0.5, 0.5,    1, 0, 0,
-    0.5,  0.5,    1, 1, 0,
-    0.5,  -0.5,   0, 1, 0,
+//  X     Y       U  V
+    -0.5,  0.5,   0, 0,
+     0.5, -0.5,   1, 1,
+    -0.5, -0.5,   0, 1,
+    -0.5,  0.5,   0, 0,
+     0.5,  0.5,   1, 0,
+     0.5, -0.5,   1, 1,
 ];
 
-export type DrawableInitReturnType = [number, number, WebGLVertexArrayObject | null];
+export type DrawableInitReturnType = [number, number, WebGLVertexArrayObject | null, WebGLTexture | null];
 
 export default class Drawable {
 
@@ -46,26 +48,57 @@ export default class Drawable {
         gl.bindBuffer(gl.ARRAY_BUFFER, vertexBufferObject);
 
         const positionAttribLocation = gl.getAttribLocation(program, 'vertPosition');
-        const colorAttribLocation    = gl.getAttribLocation(program, 'vertColor');
+        const texCoordAttribLocation = gl.getAttribLocation(program, 'vertTexCoord');
 
         gl.vertexAttribPointer(
             positionAttribLocation, 2,
-            gl.FLOAT,  false,
-            5 * Float32Array.BYTES_PER_ELEMENT,  0
+            gl.FLOAT, false,
+            4 * Float32Array.BYTES_PER_ELEMENT,  0
         );
         gl.vertexAttribPointer(
-            colorAttribLocation, 3,
+            texCoordAttribLocation, 2,
             gl.FLOAT, false,
-            5 * Float32Array.BYTES_PER_ELEMENT, 2 * Float32Array.BYTES_PER_ELEMENT
+            4 * Float32Array.BYTES_PER_ELEMENT, 2 * Float32Array.BYTES_PER_ELEMENT
         );
+
+
+        // create texture
+
+        const textureElem = document.createElement('img');
+        textureElem.src = testTexture;
+
+        const texture = gl.createTexture();
+        gl.bindTexture(gl.TEXTURE_2D, texture);
+
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+
+        gl.texImage2D(
+            gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, 
+            gl.UNSIGNED_BYTE, textureElem
+        );
+
+        gl.bindTexture(gl.TEXTURE_2D, texture);
+        gl.activeTexture(gl.TEXTURE0);
+
+        
+        // unbind
+
+        gl.bindBuffer(gl.ARRAY_BUFFER, null);
+        gl.bindVertexArray(null);
+
 
         let r: DrawableInitReturnType = [
             positionAttribLocation, 
-            colorAttribLocation, 
-            vertexArrayObject
+            texCoordAttribLocation, 
+            vertexArrayObject,
+            texture
         ];
         return r;
-        
+
     }
 
     render (program: WebGLProgram, posLoc: number, colorLoc: number) {
