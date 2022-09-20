@@ -28,12 +28,12 @@ export type DrawableInitReturnType = [number, number, WebGLVertexArrayObject | n
 
 export default class Drawable {
 
+    protected canvas: HTMLCanvasElement;
+    protected gl:     WebGL2RenderingContext;
+
     protected width:  number = 0;
     protected height: number = 0;
     protected texture: WebGLTexture;
-
-    protected canvas: HTMLCanvasElement;
-    protected gl:     WebGL2RenderingContext;
 
     posX:   number = 320;
     posY:   number = 180;
@@ -48,15 +48,19 @@ export default class Drawable {
 
     constructor (texture: string, canvas: HTMLCanvasElement) {
 
+        // initialize
+
         this.canvas = canvas;
         this.gl     = this.canvas.getContext("webgl2")!;
 
         let gl = this.gl;
 
+
         // canvas vars
 
         [CANVASW, CANVASH] = [canvas.width*0.5, canvas.height*0.5];
         [CANVASWC, CANVASHC] = canvasSizeCompensate(CANVASW, CANVASH);
+
 
         // create texture
 
@@ -124,12 +128,14 @@ export default class Drawable {
         const gl = this.gl;
         
 
-        // adjust rotation, size, position and scale values to be GL-compatible
+        // adjust values to be GL-compatible
         //
         //  •  rotation: from degrees to radians
         //  •  size:     be canvas-independent
         //  •  position: be canvas-independent + begin at the bottom left corner
         //  •  scale:    from percentages to multipliers (div by 100)
+        //  •  color:    be from 0 to 1 instead of 0 to 255
+        //  •  opacity:  be from 0 to 1 instead of 0 to 100
 
         let rotAdj = transformRotCoords(this.rot);
 
@@ -184,18 +190,21 @@ export default class Drawable {
     setTexture (texture: string) {
         let gl = this.gl;
 
+        // create a new texture image
         const textureElem = new Image();
         textureElem.src = textureAtlas[texture];
 
+        // bind texture and set it
         gl.bindTexture(gl.TEXTURE_2D, this.texture);
-
         gl.texImage2D(
             gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, 
             gl.UNSIGNED_BYTE, textureElem
         );
 
+        // unbind
         gl.bindTexture(gl.TEXTURE_2D, null);
 
+        // calculate drawable size based on the source image's size
         this.calcSize(textureElem);
     }
 
