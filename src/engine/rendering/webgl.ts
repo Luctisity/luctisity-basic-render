@@ -8,8 +8,7 @@ let gl:                     WebGL2RenderingContext,
     program:                WebGLProgram, 
     positionAttribLocation: number, 
     colorAttribLocation:    number, 
-    vertexArrayObject:      WebGLVertexArrayObject | null,
-    texture:                WebGLTexture | null;
+    vertexArrayObject:      WebGLVertexArrayObject | null;
 
 export function initGl (canvas: HTMLCanvasElement) {
     // get gl context
@@ -63,8 +62,7 @@ export function initGl (canvas: HTMLCanvasElement) {
     [
         positionAttribLocation, 
         colorAttribLocation, 
-        vertexArrayObject,
-        texture
+        vertexArrayObject
     ] = Drawable.init(gl, program);
 
     renderGl();

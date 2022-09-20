@@ -1,7 +1,13 @@
 import { mat3 } from "gl-matrix";
 import { canvasSizeCompensate, transformColor, transformPosCoords, transformRotCoords, transformScaleCoords } from "../util/util";
 
-import testTexture from "../../assets/textures/troll.png";
+import manTexture   from "../../assets/textures/man.jpg";
+import trollTexture from "../../assets/textures/troll.png";
+
+const textureAtlas: any = {
+    man:   manTexture,
+    troll: trollTexture
+}
 
 let CANVASW:  number;
 let CANVASH:  number;
@@ -18,15 +24,16 @@ export const rectVertices = [
      0.5, -0.5,   1, 1,
 ];
 
-export type DrawableInitReturnType = [number, number, WebGLVertexArrayObject | null, WebGLTexture | null];
+export type DrawableInitReturnType = [number, number, WebGLVertexArrayObject | null];
 
 export default class Drawable {
 
-    width:  number;
-    height: number;
+    protected width:  number = 0;
+    protected height: number = 0;
+    protected texture: WebGLTexture;
 
-    canvas: HTMLCanvasElement;
-    gl:     WebGL2RenderingContext;
+    protected canvas: HTMLCanvasElement;
+    protected gl:     WebGL2RenderingContext;
 
     posX:   number = 320;
     posY:   number = 180;
@@ -39,16 +46,33 @@ export default class Drawable {
     colorB:  number = 255;
     opacity: number = 100;
 
-    constructor (width: number, height: number, canvas: HTMLCanvasElement) {
-        this.width  = width;
-        this.height = height;
+    constructor (texture: string, canvas: HTMLCanvasElement) {
+
         this.canvas = canvas;
         this.gl     = this.canvas.getContext("webgl2")!;
+
+        let gl = this.gl;
 
         // canvas vars
 
         [CANVASW, CANVASH] = [canvas.width*0.5, canvas.height*0.5];
         [CANVASWC, CANVASHC] = canvasSizeCompensate(CANVASW, CANVASH);
+
+        // create texture
+
+        this.texture = gl.createTexture()!;
+        gl.bindTexture(gl.TEXTURE_2D, this.texture);
+
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+
+        gl.activeTexture(gl.TEXTURE0);
+
+        this.setTexture(texture);
+
     }
 
     static init (gl: WebGL2RenderingContext, program: WebGLProgram) {
@@ -79,29 +103,6 @@ export default class Drawable {
             4 * Float32Array.BYTES_PER_ELEMENT, 2 * Float32Array.BYTES_PER_ELEMENT
         );
 
-
-        // create texture
-
-        const textureElem = document.createElement('img');
-        textureElem.src = testTexture;
-
-        const texture = gl.createTexture();
-        gl.bindTexture(gl.TEXTURE_2D, texture);
-
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-
-        gl.texImage2D(
-            gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, 
-            gl.UNSIGNED_BYTE, textureElem
-        );
-
-        gl.bindTexture(gl.TEXTURE_2D, texture);
-        gl.activeTexture(gl.TEXTURE0);
-
         
         // unbind
 
@@ -112,8 +113,7 @@ export default class Drawable {
         let r: DrawableInitReturnType = [
             positionAttribLocation, 
             texCoordAttribLocation, 
-            vertexArrayObject,
-            texture
+            vertexArrayObject
         ];
         return r;
 
@@ -167,11 +167,41 @@ export default class Drawable {
         gl.enableVertexAttribArray(colorLoc);
         gl.blendFuncSeparate(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
 
+
         // render
 
+        gl.bindTexture(gl.TEXTURE_2D, this.texture);
         gl.bindVertexArray(vertexArrayObject);
         gl.drawArrays(gl.TRIANGLES, 0, 6);
 
+
+        // unbind
+
+        gl.bindTexture(gl.TEXTURE_2D, null);
+
+    }
+
+    setTexture (texture: string) {
+        let gl = this.gl;
+
+        const textureElem = new Image();
+        textureElem.src = textureAtlas[texture];
+
+        gl.bindTexture(gl.TEXTURE_2D, this.texture);
+
+        gl.texImage2D(
+            gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, 
+            gl.UNSIGNED_BYTE, textureElem
+        );
+
+        gl.bindTexture(gl.TEXTURE_2D, null);
+
+        this.calcSize(textureElem);
+    }
+
+    private calcSize (image: HTMLImageElement) {
+        this.width  = image.width;
+        this.height = image.height;
     }
 
 }

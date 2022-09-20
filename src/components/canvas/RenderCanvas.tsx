@@ -31,11 +31,13 @@ export default class RenderCanvas extends Component <RenderCanvasProps> {
         let canvas = this.canvasRef.current;
 
         // create a drawable
-        this.testDrawable = new Drawable(300, 200, canvas);
+        this.testDrawable = new Drawable("man", canvas);
         this.testDrawable.colorR = 0;
         this.testDrawable.colorG = 128;
 
-        this.testDrawable2 = new Drawable(100, 200, canvas);
+        this.testDrawable2 = new Drawable("troll", canvas);
+        this.testDrawable2.scaleX = 50;
+        this.testDrawable2.scaleY = 80;
 
         addDrawable(this.testDrawable2);
         addDrawable(this.testDrawable);
@@ -68,6 +70,7 @@ export default class RenderCanvas extends Component <RenderCanvasProps> {
         this.testDrawable!.opacity = Math.sin(now*0.001) * 50 + 50;
 
         this.testDrawable2!.posX = Math.sin(now*0.001) * 100 + 420;
+        this.testDrawable2!.setTexture(Math.round(Math.random()) ? "man" : "troll");
 
         // render and continue loop
         renderGl();
