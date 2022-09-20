@@ -65,12 +65,21 @@ export default class Drawable {
             vertexArrayObject
         ];
         return r;
+        
     }
 
     render (program: WebGLProgram, posLoc: number, colorLoc: number) {
 
         const gl = this.gl;
         
+
+        // adjust rotation, size, position and scale values to be GL-compatible
+        //
+        //  •  rotation: from degrees to radians
+        //  •  size:     be canvas-independent
+        //  •  position: be canvas-independent + begin at the bottom left corner
+        //  •  scale:    from percentages to multipliers (div by 100)
+
         let rotAdj = transformRotCoords(this.rot);
 
         let [widthAdj, heightAdj] = transformSizeCoords(
@@ -83,17 +92,22 @@ export default class Drawable {
             this.canvas.width, this.canvas.height
         );
 
-
         let [scaleXAdj, scaleYAdj] = transformScaleCoords(this.scaleX, this.scaleY);
+
+
+        // create a transform matrix
 
         let transform = mat3.create();
 
         mat3.translate (transform, transform, [posXAdj,   posYAdj]);
+        mat3.rotate    (transform, transform, rotAdj);
         mat3.scale     (transform, transform, [widthAdj,  heightAdj]);
         mat3.scale     (transform, transform, [scaleXAdj, scaleYAdj]);
-        mat3.rotate    (transform, transform, rotAdj);
 
         gl.uniformMatrix3fv(gl.getUniformLocation(program, 'transform'), false, transform);
+
+
+        // update gl stuff
 
         gl.enableVertexAttribArray(posLoc);
         gl.enableVertexAttribArray(colorLoc);

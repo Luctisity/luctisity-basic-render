@@ -2,17 +2,24 @@ import vertexShaderSource   from '../../assets/shaders/vertex.vsh?raw';
 import fragmentShaderSource from '../../assets/shaders/fragment.fsh?raw';
 import Drawable from './drawable';
 
+const drawables: Set <Drawable> = new Set();
+
+let gl:                     WebGL2RenderingContext,
+    program:                WebGLProgram, 
+    positionAttribLocation: number, 
+    colorAttribLocation:    number, 
+    vertexArrayObject:      WebGLVertexArrayObject | null;
+
 export function initGl (canvas: HTMLCanvasElement) {
     // get gl context
 
-    const gl = canvas.getContext('webgl2');
+    gl = canvas.getContext('webgl2')!;
     if (!gl) return false;
 
 
     // black clear color
 
-    gl.clearColor(0, 0, 0, 1);
-    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+    clearBg();
 
 
     // create vertex and fragment shaders
@@ -38,7 +45,7 @@ export function initGl (canvas: HTMLCanvasElement) {
 
     // create program
 
-    const program = gl.createProgram()!;
+    program = gl.createProgram()!;
     gl.attachShader(program, vertexShader);
     gl.attachShader(program, fragmentShader);
 
@@ -50,23 +57,38 @@ export function initGl (canvas: HTMLCanvasElement) {
     
     gl.useProgram(program);
 
-    // create drawable
+    // create drawables
 
-    const [
+    [
         positionAttribLocation, 
         colorAttribLocation, 
         vertexArrayObject
     ] = Drawable.init(gl, program);
 
-    const testRect = new Drawable(400, 200, canvas);
-    testRect.rot = 15;
-    testRect.render(program, positionAttribLocation, colorAttribLocation);
+    renderGl();
 
-    // render
+    return true;
+
+}
+
+export function renderGl () {
+
+    clearBg();
+    
+    drawables.forEach(d => {
+        d.render(program, positionAttribLocation, colorAttribLocation);
+    });
 
     gl.bindVertexArray(vertexArrayObject);
     gl.drawArrays(gl.TRIANGLES, 0, 6);
 
-    return true;
+}
 
+export function addDrawable (d: Drawable) {
+    drawables.add(d);
+}
+
+function clearBg () {
+    gl.clearColor(0, 0, 0, 1);
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 }
