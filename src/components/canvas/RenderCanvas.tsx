@@ -58,21 +58,24 @@ export default class RenderCanvas extends Component <RenderCanvasProps> {
         this.audioManager.createChannel("troll");
         this.audioManager.connectSoundToChannel("fart", "man");
         this.audioManager.connectSoundToChannel("quandale", "troll");
-        this.audioManager.setChannelEffects("troll", { pitch: 0.5, speed: 1 });
+        this.audioManager.setChannelEffects("troll", { pitch: 0.5, speed: 1, reverb: 10 });
 
         setTimeout(() => {
             this.audioManager.playSound("quandale");
         }, 2000);
         setTimeout(() => {
             this.audioManager.playSound("quandale");
+            this.audioManager.setChannelEffects("troll", { reverb: 1 });
         }, 4000);
         setTimeout(() => {
+            this.audioManager.setChannelEffects("man", { reverb: 1 });
             this.audioManager.playSoundLoop("fart");
         }, 6000);
         setTimeout(() => {
             this.audioManager.stopSound("quandale");
         }, 7000);
         setTimeout(() => {
+            this.audioManager.setChannelEffects("man", { reverb: 0 });
             this.audioManager.playSound("fart");
         }, 11000);
     }
@@ -98,7 +101,7 @@ export default class RenderCanvas extends Component <RenderCanvasProps> {
 
         this.testDrawable2!.posX = Math.sin(now*0.001) * 100 + 420;
         this.audioManager.setChannelEffects("troll", { 
-            pan: Math.sin(now*0.001),
+            pan: Math.sin(now*0.001)
             /*pitch: Math.sin(now*0.001)+1,
             speed: 1/(Math.sin(now*0.001)+1.5),*/
         });

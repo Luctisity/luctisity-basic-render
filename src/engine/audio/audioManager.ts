@@ -15,6 +15,7 @@ export type AudioChannel = {
     volume: Tone.Gain,
     pan:    Tone.Panner,
     pitch:  Tone.PitchShift,
+    reverb: Tone.Reverb,
     tracks: AudioTrack[]
 }
 
@@ -68,14 +69,17 @@ export default class AudioManager {
         const volume = new Tone.Gain();
         const pan    = new Tone.Panner();
         const pitch  = new Tone.PitchShift();
+        const reverb = new Tone.Reverb();
         pitch.windowSize = 0.05;
+        reverb.wet.value = 0;
     
-        Tone.connect(volume, pan);
-        Tone.connect(pan, pitch);
-        pitch.toDestination();
+        volume.connect(pan);
+        pan.connect(pitch);
+        pitch.connect(reverb);
+        reverb.toDestination();
     
         this.audioChannels[id] = {
-            volume, pan, pitch,
+            volume, pan, pitch, reverb,
             tracks: [], effectOptions: defaultSoundEffectOptions
         }
     }
@@ -110,15 +114,30 @@ export default class AudioManager {
         if (!channel) return;
         Object.assign(channel.effectOptions, effects);
     
+        // pan
         channel.pan.pan.value = geteff(effects, 'pan');
-        if (effects.pitch) {
+
+        // pitch (cannot go lower than 0.1)
+        if (effects.pitch !== undefined) {
             channel.pitch.pitch = markiplierToSemitone(Math.max(geteff(effects, 'pitch'), 0.1));
         }
-        if (effects.speed) {
+
+        // speed (cannot go lower than 0.1)
+        if (effects.speed !== undefined) {
             const playbackRate = Math.max(geteff(effects, 'speed'), 0.1);
             channel.tracks.forEach(track => {
                 track.track.playbackRate = playbackRate;
             });
+        }
+
+        // reverb (wet can be between 0 an 1, and decay between 0.1 and 10)
+        if (effects.reverb !== undefined) {
+            channel.reverb.wet.value = Math.min(Math.max(
+                geteff(effects, 'reverb')*0.8, 
+            0), 1);
+            channel.reverb.decay = Math.min(Math.max(
+                geteff(effects, 'reverb'), 
+            0.1), 10);
         }
     }
 
