@@ -1,13 +1,7 @@
 import { mat3 } from "gl-matrix";
 import { canvasSizeCompensate, transformColor, transformPosCoords, transformRotCoords, transformScaleCoords } from "../util/util";
 
-import manTexture   from "../../assets/textures/man.jpg";
-import trollTexture from "../../assets/textures/troll.png";
-
-const textureAtlas: any = {
-    man:   manTexture,
-    troll: trollTexture
-}
+import assetAtlas from '../assets/assetAtlas';
 
 let CANVASW:  number;
 let CANVASH:  number;
@@ -192,7 +186,7 @@ export default class Drawable {
 
         // create a new texture image
         const textureElem = new Image();
-        textureElem.src = textureAtlas[texture];
+        textureElem.src = assetAtlas.textures[texture];
 
         // bind texture and set it
         gl.bindTexture(gl.TEXTURE_2D, this.texture);

@@ -16,7 +16,8 @@
     "license": "MIT",
     "dependencies": {
         "gl-matrix": "^3.4.3",
-        "preact": "^10.10.6"
+        "preact": "^10.10.6",
+        "tone": "^14.7.77"
     },
     "devDependencies": {
         "@preact/preset-vite": "^2.3.0",

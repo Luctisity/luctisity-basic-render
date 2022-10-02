@@ -1,4 +1,5 @@
 import { Component, createRef } from 'preact';
+import { connectSoundToChannel, createChannel, initAudio, playSound, playSoundLoop, setChannelEffects, setChannelVolume, stopSound } from '../../engine/audio/audioManager';
 import Drawable from '../../engine/rendering/drawable';
 import { addDrawable, initGl, renderGl } from '../../engine/rendering/webgl';
 import './RenderCanvas.css';
@@ -42,12 +43,35 @@ export default class RenderCanvas extends Component <RenderCanvasProps> {
         addDrawable(this.testDrawable2);
         addDrawable(this.testDrawable);
 
-        // initiate webgl, return if error
-        let success = initGl(this.canvasRef.current);
+        // initiate webgl and audio, return if error
+        let success = initGl(this.canvasRef.current) && initAudio();
         if (!success) return this.setState({ error: true });
 
         // start render loop
         requestAnimationFrame(() => this.step(Date.now()));
+
+        // sound test
+        createChannel("man");
+        createChannel("troll");
+        connectSoundToChannel("fart", "man");
+        connectSoundToChannel("quandale", "troll");
+        setChannelEffects("troll", { pitch: 0.5, speed: 1 });
+
+        setTimeout(() => {
+            playSound("quandale");
+        }, 2000);
+        setTimeout(() => {
+            playSound("quandale");
+        }, 4000);
+        setTimeout(() => {
+            playSoundLoop("fart");
+        }, 6000);
+        setTimeout(() => {
+            stopSound("quandale");
+        }, 7000);
+        setTimeout(() => {
+            playSound("fart");
+        }, 11000);
     }
 
     step = (prevNow: number = Date.now(), internalPrevNow: number = 0) => {
@@ -70,6 +94,11 @@ export default class RenderCanvas extends Component <RenderCanvasProps> {
         this.testDrawable!.opacity = Math.sin(now*0.001) * 50 + 50;
 
         this.testDrawable2!.posX = Math.sin(now*0.001) * 100 + 420;
+        setChannelEffects("troll", { 
+            pan: Math.sin(now*0.001),
+            /*pitch: Math.sin(now*0.001)+1,
+            speed: 1/(Math.sin(now*0.001)+1.5),*/
+        });
         this.testDrawable2!.setTexture(Math.round(Math.random()) ? "man" : "troll");
 
         // render and continue loop

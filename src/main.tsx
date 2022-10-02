@@ -1,3 +1,5 @@
+(window as any).TONE_SILENCE_VERSION_LOGGING = false;
+
 import { render } from 'preact';
 import RenderCanvas from './components/canvas/RenderCanvas';
 
