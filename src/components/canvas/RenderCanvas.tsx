@@ -1,7 +1,7 @@
 import { Component, createRef } from 'preact';
-import { connectSoundToChannel, createChannel, initAudio, playSound, playSoundLoop, setChannelEffects, setChannelVolume, stopSound } from '../../engine/audio/audioManager';
 import Drawable from '../../engine/rendering/drawable';
-import { addDrawable, initGl, renderGl } from '../../engine/rendering/webgl';
+import RenderManager from '../../engine/rendering/renderManager';
+import AudioManager from '../../engine/audio/audioManager';
 import './RenderCanvas.css';
 
 export type RenderCanvasProps = {
@@ -20,6 +20,9 @@ export default class RenderCanvas extends Component <RenderCanvasProps> {
     testDrawable2?: Drawable;
 
     fpsDelta = this.props.fps ? 1/this.props.fps : -1;
+
+    renderManager = new RenderManager();
+    audioManager  = new AudioManager();
 
     render () {
         return <div className="canvas-wrapper">
@@ -40,37 +43,37 @@ export default class RenderCanvas extends Component <RenderCanvasProps> {
         this.testDrawable2.scaleX = 50;
         this.testDrawable2.scaleY = 80;
 
-        addDrawable(this.testDrawable2);
-        addDrawable(this.testDrawable);
+        this.renderManager.addDrawable(this.testDrawable2);
+        this.renderManager.addDrawable(this.testDrawable);
 
         // initiate webgl and audio, return if error
-        let success = initGl(this.canvasRef.current) && initAudio();
+        let success = this.renderManager.initGl(this.canvasRef.current) && this.audioManager.initAudio();
         if (!success) return this.setState({ error: true });
 
         // start render loop
         requestAnimationFrame(() => this.step(Date.now()));
 
         // sound test
-        createChannel("man");
-        createChannel("troll");
-        connectSoundToChannel("fart", "man");
-        connectSoundToChannel("quandale", "troll");
-        setChannelEffects("troll", { pitch: 0.5, speed: 1 });
+        this.audioManager.createChannel("man");
+        this.audioManager.createChannel("troll");
+        this.audioManager.connectSoundToChannel("fart", "man");
+        this.audioManager.connectSoundToChannel("quandale", "troll");
+        this.audioManager.setChannelEffects("troll", { pitch: 0.5, speed: 1 });
 
         setTimeout(() => {
-            playSound("quandale");
+            this.audioManager.playSound("quandale");
         }, 2000);
         setTimeout(() => {
-            playSound("quandale");
+            this.audioManager.playSound("quandale");
         }, 4000);
         setTimeout(() => {
-            playSoundLoop("fart");
+            this.audioManager.playSoundLoop("fart");
         }, 6000);
         setTimeout(() => {
-            stopSound("quandale");
+            this.audioManager.stopSound("quandale");
         }, 7000);
         setTimeout(() => {
-            playSound("fart");
+            this.audioManager.playSound("fart");
         }, 11000);
     }
 
@@ -94,7 +97,7 @@ export default class RenderCanvas extends Component <RenderCanvasProps> {
         this.testDrawable!.opacity = Math.sin(now*0.001) * 50 + 50;
 
         this.testDrawable2!.posX = Math.sin(now*0.001) * 100 + 420;
-        setChannelEffects("troll", { 
+        this.audioManager.setChannelEffects("troll", { 
             pan: Math.sin(now*0.001),
             /*pitch: Math.sin(now*0.001)+1,
             speed: 1/(Math.sin(now*0.001)+1.5),*/
@@ -102,7 +105,7 @@ export default class RenderCanvas extends Component <RenderCanvasProps> {
         this.testDrawable2!.setTexture(Math.round(Math.random()) ? "man" : "troll");
 
         // render and continue loop
-        renderGl();
+        this.renderManager.render();
         requestAnimationFrame(() => this.step(now, now));
     }
 
