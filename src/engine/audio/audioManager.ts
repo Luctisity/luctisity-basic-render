@@ -1,5 +1,6 @@
 import assetAtlas from '../assets/assetAtlas';
 import * as Tone from 'tone';
+import { markiplierToSemitone } from '../util/util';
 
 export type AudioTrack = {
     track:    Tone.Player
@@ -153,6 +154,12 @@ export default class AudioManager {
     stopSound (id: string) {
         this.audioTracks[id]?.track.stop();
     }
+
+    stopAllSounds () {
+        for (let track in this.audioTracks) {
+            this.audioTracks[track].track.stop();
+        }
+    }
     
     
     private queueSound (id: string, opts: QueueOptions) {
@@ -170,8 +177,4 @@ export default class AudioManager {
 
 function geteff (effects: SoundEffectOptions, key: SoundEffectOption) {
     return effects[key] || defaultSoundEffectOptions[key];
-}
-
-function markiplierToSemitone (factor: number) { 
-    return Math.log(factor) * Math.LOG2E * 12;
 }
